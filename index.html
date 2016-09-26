@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta charset="utf-8" />
+    <title>jQuery无限加载瀑布流</title>
+    <style type="text/css">
+    /* 标签重定义 */
+    body{padding:0;margin:0;}
+    img{border:none;}
+    a{text-decoration:none;color:#444;}
+    a:hover{color:#999;}
+    #title{width:600px;margin:20px auto;text-align:center;}
+    /* 定义关键帧 */
+    @-webkit-keyframes shade{
+        from{opacity:1;}
+        15%{opacity:0.4;}
+        to{opacity:1;}
+    }
+    @-moz-keyframes shade{
+        from{opacity:1;}
+        15%{opacity:0.4;}
+        to{opacity:1;}
+    }
+    @-ms-keyframes shade{
+        from{opacity:1;}
+        15%{opacity:0.4;}
+        to{opacity:1;}
+    }
+    @-o-keyframes shade{
+        from{opacity:1;}
+        15%{opacity:0.4;}
+        to{opacity:1;}
+    }
+    @keyframes shade{
+        from{opacity:1;}
+        15%{opacity:0.4;}
+        to{opacity:1;}
+    }
+    /* wrap */
+    #wrap{width:auto;height:auto;margin:0 auto;position:relative;}
+    #wrap .box{width:280px;height:auto;padding:10px;border:none;float:left;}
+    #wrap .box .info{width:280px;height:auto;border-radius:8px;box-shadow:0 0 11px #666;background:#fff;}
+    #wrap .box .info .pic{width:260px;height:auto;margin:0 auto;padding-top:10px;}
+    #wrap .box .info .pic:hover{
+        -webkit-animation:shade 3s ease-in-out 1;
+        -moz-animation:shade 3s ease-in-out 1;
+        -ms-animation:shade 3s ease-in-out 1;
+        -o-animation:shade 3s ease-in-out 1;
+        animation:shade 3s ease-in-out 1;
+    }
+    #wrap .box .info .pic img{width:260px;border-radius:3px;}
+    #wrap .box .info .title{width:260px;height:40px;margin:0 auto;line-height:40px;text-align:center;color:#666;font-size:18px;font-weight:bold;overflow:hidden;}
+    </style>
+    </head>
+    <body>
+        <section id="title">
+            <h2>项目展示</h2>
+        </section>
+        <div id="wrap">
+        </div>
+        <script type="text/javascript" src="js/jquery.js"></script>
+        <script type="text/javascript">
+            window.onload = function(){
+                show();
+            }
+            // 模拟数据
+            var data = [
+                {
+                    'src':'1.jpg',
+                    'title':'仿百度音乐播放器',
+                    'href':'https://xlweb.github.io/music/'
+                },
+                {
+                    'src':'2.jpg',
+                    'title':'js音乐播放器-歌词联动',
+                    'href':'https://xlweb.github.io/music2/'
+                },
+                {
+                    'src':'3.jpg',
+                    'title':'仿小米PC端',
+                    'href':'https://xlweb.github.io/xiaomi/'
+                },
+                {
+                    'src':'4.jpg',
+                    'title':'HTML5爱心',
+                    'href':'https://xlweb.github.io/love/'
+                },
+                {
+                    'src':'5.jpg',
+                    'title':'JavaScriptp+Canvas 贪吃蛇游戏',
+                    'href':'https://xlweb.github.io/snake/'
+                },
+                {
+                    'src':'6.jpg',
+                    'title':'响应式潭州旅行社',
+                    'href':'https://xlweb.github.io/tour/'
+                },
+                {
+                    'src':'7.jpg',
+                    'title':'canvas模拟下雪',
+                    'href':'https://xlweb.github.io/snow/'
+                },
+                {
+                    'src':'8.jpg',
+                    'title':'绚丽美食墙',
+                    'href':'https://xlweb.github.io/food/'
+                },
+                {
+                    'src':'9.jpg',
+                    'title':'仿百度首页搜索',
+                    'href':'https://xlweb.github.io/search/'
+                }
+            ];
+
+            /**
+             * [show 瀑布流主函数]
+             */
+            function show(){
+                wrap = document.getElementById('wrap');
+                //  1. 获取每一个box元素
+                var boxs  = getClass(wrap,"box");
+                //  2.获得屏幕可显示的列数
+                var boxW = boxs[0].offsetWidth;
+                //  获取总列数
+                var colsNum = Math.floor(document.documentElement.clientWidth/boxW);
+                //  为外层赋值宽度
+                wrap.style.width = boxW*colsNum+'px';
+                //定义一个数组存储每一列的高度
+                var everyH = [];
+                //  3.循环出所有的box并按照瀑布流排列
+                for (var i = 0; i < boxs.length; i++) {
+                    if(i<colsNum){
+                        everyH[i] = boxs[i].offsetHeight;
+                    }else{
+                        var minH = Math.min.apply(null,everyH);//获得最小的列的高度
+                        var minIndex = getIndex(minH,everyH); //获得最小列的索引
+                        getStyle(boxs[i],minH,boxs[minIndex].offsetLeft,i);
+                        everyH[minIndex] += boxs[i].offsetHeight;//更新最小列的高度
+                    }
+                }
+            }
+            /**
+             * [createEle 创建子元素]
+             */
+            function createEle(){
+                for(i in data){
+                     //创建box
+                    var box = document.createElement('div');
+                    box.className = 'box';
+                    wrap.appendChild(box);
+
+                    //创建info
+                    var info = document.createElement('div');
+                    info.className = 'info';
+                    box.appendChild(info);
+
+                    //创建pic
+                    var pic = document.createElement('div');
+                    pic.className = 'pic';
+                    info.appendChild(pic);
+
+                    //创建img
+                    var img = document.createElement('img');
+                    img.src = 'images/'+data[i].src;
+                    img.style.height = 'auto';
+                    pic.appendChild(img);
+
+                    //创建title
+                    var title = document.createElement('div');
+                    title.className = 'title';
+                    info.appendChild(title);
+
+                    //创建a标记
+                    var a = document.createElement('a');
+                    a.innerHTML = data[i].title;
+                    a.href = data[i].href;
+                    a.setAttribute("target","_blank");
+                    title.appendChild(a);
+                };
+            };
+            createEle();
+            /**
+            * 获取类元素
+            * @param  warp      [Obj] 外层
+            * @param  className [Str] 类名
+            */
+            function getClass(wrap,className){
+                var obj = wrap.getElementsByTagName('*');
+                var arr = [];
+                for(var i=0;i<obj.length;i++){
+                    if(obj[i].className == className){
+                        arr.push(obj[i]);
+                    }
+                }
+                return arr;
+            }
+            /**
+            * 获取最小列的索引
+            * @param  minH   [Num] 最小高度
+            * @param  everyH [Arr] 所有列高度的数组
+            */
+            function getIndex(minH,everyH){
+                for(index in everyH){
+                    if (everyH[index] == minH ) return index;
+                }
+            }
+
+            /**
+            * 设置加载样式
+            * @param  box   [obj] 设置的Box
+            * @param  top   [Num] box的top值
+            * @param  left  [Num] box的left值
+            * @param  index [Num] box的第几个
+            */
+
+            var getStartNum = 0;//设置请求加载的条数的位置
+            function getStyle(box,top,left,index){
+                if (getStartNum>=index) return;
+                $(box).css({
+                    'position':'absolute',
+                    'top':top,
+                    "left":left,
+                    "opacity":"0"
+                });
+                $(box).stop().animate({
+                    "opacity":"1"
+                },999);
+                getStartNum = index;//更新请求数据的条数位置
+            }
+        </script>
+    </body>
+</html>
